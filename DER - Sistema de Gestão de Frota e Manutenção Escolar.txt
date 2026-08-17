@@ -1,0 +1,14 @@
+Situação de Aprendizagem: Sistema de Gestão de Frota e Manutenção Escolar
+
+Entidades: 
+	Veiculo :
+		(Placa VARCHAR(7) (PK),modelo varchar,ano INT,capacidade INT) <-- Atributos
+	Motoristas :
+		(CPF VARCHAR(14) (PK),Nome VARCHAR(100), CNH VARCHAR(6) , Telefone VARCHAR(15) ) <-- Atributos
+	Viagens :
+		(Placa VARCHAR(7) FK, Hora DATETIME, Destino VARCHAR (50) ) <-- Atributos
+	Manutenções :
+		(Código VARCHAR(20) PK, Data DATE , descriçãodoservico VARCHAR(10000),Custototal DECIMAL) <-- Atributos
+
+	
+	
