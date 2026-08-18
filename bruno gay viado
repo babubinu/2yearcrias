@@ -1,0 +1,45 @@
+CREATE DATABASE IF NOT EXISTS aula3_db;
+USE aula3_db;
+
+-- 1. Criação das Tabelas
+CREATE TABLE clientes (
+	id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    cidade VARCHAR(50) NOT NULL
+); 
+
+CREATE TABLE pedidos (
+	id_pedido INT auto_increment PRIMARY KEY,
+    data_pedido DATE NOT NULL,
+    valor_total DECIMAL (10,2) NOT NULL,
+    id_cliente INT,
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
+);
+
+show tables;
+select * from clientes;
+select * from pedidos;
+
+INSERT INTO clientes (nome,cidade) VALUES
+('Hermilio Lunas' , 'Presidente Prudente'),
+('Maria Oliveira' ,  'Sao Paulo'),
+('Joao Pedro' , 'Maringá');
+
+insert into clientes values (null , 'Jorge teste' , 'Tarabai');
+
+INSERT INTO pedidos (data_pedido , valor_total , id_cliente) VALUES
+('2026-08-10', '250.00' , 1),
+('2026-08-12', '450.00' , 1),
+('2026-08-15', '120.00' , 1);
+
+insert into pedidos values (null , '2026-08-18' , '376.00' , '1');
+
+delete from clientes where id_cliente > 4;
+
+select nome as 'Nome do Meliante' , cidade as 'Beco do Caba', data_pedido, valor_total from clientes inner join pedidos
+	on clientes.id_cliente = pedidos.id_cliente;
+    
+select nome as 'Nome do Meliante' , cidade as 'Beco do Caba', data_pedido, valor_total from clientes inner join pedidos
+	on clientes.id_cliente = pedidos.id_cliente
+    where valor_total  = 300.00; 
+    
