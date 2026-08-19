@@ -1,0 +1,4 @@
+public static MySqpConnection ObterConexao()
+{
+	return new MySqlConnection(strConexao);
+}
