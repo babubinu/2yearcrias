@@ -1,1 +1,5 @@
-Arquivo de ativos 'C:\Users\wellingtonjunior\Downloads\SistemaFullStackApp (2)\SistemaFullStackApp\SistemaFullStackApp\obj\project.assets.json' não encontrado. Execute uma restauração de pacote do NuGet para gerar esse arquivo.
+CREATE TABLE Movimentacoes (
+	Id INT auto_increment primary key,
+    Dataa DATE,
+    Tipo ENUM('Entrada', 'Saida', 'Esperando'),
+    Quantidade INT);
