@@ -1,0 +1,57 @@
+--AULA TERÇA2508
+
+CREATE DATABASE loja_aula4;
+use loja_aula4;
+
+create table produtos(
+	id_produto INT AUTO_INCREMENT PRIMARY KEY,
+    nome varchar(50) NOT NULL,
+    preco DECIMAL(10,2) NOT NULL,
+    estoque INT DEFAULT 0
+    
+);
+
+INSERT INTO produtos (nome,preco,estoque) VALUES
+('Teclado Mecânico' , 250.00 , 15),
+('Mouse Gamer', 120.00, 30),
+('Monitor 24', 890.00, 8);
+
+select * FROM produtos;
+
+DELIMITER //
+CREATE function fn_calcula_desconto (p_preco DECIMAL(10,2), p_pct DECIMAL(3,2))
+RETURNS DECIMAL (10,2)
+DETERMINISTIC
+BEGIN
+	RETURN p_preco * (1 - (p_pct / 100));
+END //
+
+DELIMITER ;
+
+SELECT fn_calcula_desconto(100.00 , 10) AS preco_com_desconto;
+
+SELECT
+	nome,
+	preco,
+    fn_calcula_desconto(preco,15) AS preco_promocional
+FROM produtos;
+
+DELIMITER //
+CREATE PROCEDURE sp_adicione_estoque(
+ IN p_id INT,
+ IN p_qtd INT 
+)
+BEGIN
+	UPDATE produtos
+    SET estoque = estoque + p_qtd
+    WHERE id_produto = p_id;
+END //
+DELIMITER //
+
+-- ADICIONANDO 10
+CALL sp_adicione_estoque(1,10);
+
+-- VERIFICANDO O RESULTADO NO BANCO
+SELECT id_produto, nome, estoque
+FROM produtos
+WHERE id_produto = 1;
