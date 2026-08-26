@@ -1,5 +1,0 @@
-CREATE TABLE Movimentacoes (
-	Id INT auto_increment primary key,
-    Dataa DATE,
-    Tipo ENUM('Entrada', 'Saida', 'Esperando'),
-    Quantidade INT);
