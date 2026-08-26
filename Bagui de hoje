@@ -306,4 +306,40 @@ namespace SistemaFullStackApp
         <Frame x:Name="MainFrame" Grid.Column="1" NavigationUIVisibility="Hidden"/>
     </Grid>
 </Window>
+==========
+CREATE DATABASE IF NOT EXISTS Fullstack_db;
+USE Fullstack_db;
 
+CREATE TABLE IF NOT exists Produtos (
+Id INT auto_increment PRIMARY KEY,
+Nome VARCHAR(80) NOT NULL,
+Preco DECIMAL(10,2) NOT NULL,
+Estoque int not null
+);
+insert into Produtos (Nome, Preco,Estoque) VALUES
+('Tecado Mecanico(MySQL)' , 250.00 , 15),
+('MouseGamer(MySQL)' , 210.00 , 125),
+('Fone(MySQL)' , 50.00 , 515),
+('Mousepad(MySQL)' , 30.00 , 35);
+show tables;
+select * from Produtos;
+
+insert into Produtos (Nome, Preco,Estoque) VALUES
+('Fone Hyperx StingerII' , 350.00 , 25);
+
+update Produtos
+set nome = 'Mouse gamer REDRAGON'
+where id = 2;
+
+
+USE Fullstack_db;
+
+DROP TABLE IF EXISTS Movimentacoes;
+
+CREATE TABLE Movimentacoes (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Dataa DATETIME NOT NULL,
+    Tipo VARCHAR(20) NOT NULL,
+    Produto VARCHAR(100) NOT NULL,
+    Quantidade INT NOT NULL
+);
