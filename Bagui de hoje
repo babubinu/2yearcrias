@@ -56,39 +56,213 @@ AutoGenerateColumns="True"
 </Page>
 
 
-CREATE DATABASE IF NOT EXISTS Fullstack_db;
-USE Fullstack_db;
 
-CREATE TABLE IF NOT exists Produtos (
-Id INT auto_increment PRIMARY KEY,
-Nome VARCHAR(80) NOT NULL,
-Preco DECIMAL(10,2) NOT NULL,
-Estoque int not null
-);
-insert into Produtos (Nome, Preco,Estoque) VALUES
-('Tecado Mecanico(MySQL)' , 250.00 , 15),
-('MouseGamer(MySQL)' , 210.00 , 125),
-('Fone(MySQL)' , 50.00 , 515),
-('Mousepad(MySQL)' , 30.00 , 35);
-show tables;
-select * from Produtos;
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Windows;
+using System.Windows.Controls;
 
-insert into Produtos (Nome, Preco,Estoque) VALUES
-('Fone Hyperx StingerII' , 350.00 , 25);
+namespace SistemaFullStackApp
+{
+    public partial class PaginaProdutos : Page
+    {
+        public PaginaProdutos()
+        {
+            InitializeComponent();
+            CarregarProdutosMySQL();
+        }
 
-update Produtos
-set nome = 'Mouse gamer REDRAGON'
-where id = 2;
+        // ==========================================================
+        // 1. READ (Listar Produtos com MySqlDataReader)
+        // ==========================================================
+        private void CarregarProdutosMySQL()
+        {
+            List<Produto> lista = new List<Produto>();
 
+            using (MySqlConnection conn = ConexaoMySQL.ObterConexao())
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT Id, Nome, Preco, Estoque FROM Produtos ORDER BY Id DESC";
 
-USE Fullstack_db;
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(new Produto
+                            {
+                                Id = Convert.ToInt32(reader["Id"]),
+                                Nome = reader["Nome"].ToString(),
+                                Preco = Convert.ToDecimal(reader["Preco"]),
+                                Estoque = Convert.ToInt32(reader["Estoque"])
+                            });
+                        }
+                    }
 
-DROP TABLE IF EXISTS Movimentacoes;
+                    dgProdutos.ItemsSource = lista;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro MySQL ao carregar dados: {ex.Message}", "Erro de Banco", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
 
-CREATE TABLE Movimentacoes (
-    Id INT AUTO_INCREMENT PRIMARY KEY,
-    Dataa DATETIME NOT NULL,
-    Tipo VARCHAR(20) NOT NULL,
-    Produto VARCHAR(100) NOT NULL,
-    Quantidade INT NOT NULL
-);
+        // ==========================================================
+        // 2. CREATE & UPDATE (Salvar / Editar com Parâmetros)
+        // ==========================================================
+        private void btnSalvar_Click(object sender, RoutedEventArgs e)
+        {
+            // 1. Limpeza e normalização do texto
+            string nome = txtNome.Text.Trim();
+            string textoPreco = txtPreco.Text.Trim().Replace(',', '.');
+            string textoEstoque = txtEstoque.Text.Trim();
+
+            // 2. Validações com mensagens específicas
+            if (string.IsNullOrWhiteSpace(nome))
+            {
+                MessageBox.Show("Informe o Nome do produto.", "Campo Obrigatório", MessageBoxButton.OK, MessageBoxImage.Warning);
+                txtNome.Focus();
+                return;
+            }
+
+            if (!decimal.TryParse(textoPreco, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal preco))
+            {
+                MessageBox.Show("Informe um Preço válido (Ex: 150.00 ou 150,00).", "Campo Inválido", MessageBoxButton.OK, MessageBoxImage.Warning);
+                txtPreco.Focus();
+                return;
+            }
+
+            if (!int.TryParse(textoEstoque, out int estoque))
+            {
+                MessageBox.Show("Informe uma quantidade de Estoque válida (apenas números inteiros).", "Campo Inválido", MessageBoxButton.OK, MessageBoxImage.Warning);
+                txtEstoque.Focus();
+                return;
+            }
+
+            // 3. Execução no MySQL
+            using (MySqlConnection conn = ConexaoMySQL.ObterConexao())
+            {
+                try
+                {
+                    conn.Open();
+                    bool ehEdicao = !string.IsNullOrWhiteSpace(txtId.Text);
+                    string query;
+
+                    if (ehEdicao)
+                    {
+                        query = "UPDATE Produtos SET Nome = @nome, Preco = @preco, Estoque = @estoque WHERE Id = @id";
+                    }
+                    else
+                    {
+                        query = "INSERT INTO Produtos (Nome, Preco, Estoque) VALUES (@nome, @preco, @estoque)";
+                    }
+
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@nome", nome);
+                        cmd.Parameters.AddWithValue("@preco", preco);
+                        cmd.Parameters.AddWithValue("@estoque", estoque);
+
+                        if (ehEdicao)
+                        {
+                            cmd.Parameters.AddWithValue("@id", Convert.ToInt32(txtId.Text));
+                        }
+
+                        cmd.ExecuteNonQuery();
+
+                        MessageBox.Show(ehEdicao ? "Produto atualizado com sucesso!" : "Produto cadastrado com sucesso!",
+                                        "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        LimparCampos();
+                        CarregarProdutosMySQL();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao salvar no MySQL: {ex.Message}", "Erro de Banco", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        // ==========================================================
+        // 3. DELETE (Excluir Registro Selecionado)
+        // ==========================================================
+        private void btnExcluir_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtId.Text))
+            {
+                MessageBox.Show("Selecione um registro na tabela para poder excluir.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var confirmacao = MessageBox.Show($"Deseja realmente remover o produto '{txtNome.Text}'?",
+                                              "Confirmar Exclusão",
+                                              MessageBoxButton.YesNo,
+                                              MessageBoxImage.Question);
+
+            if (confirmacao == MessageBoxResult.Yes)
+            {
+                using (MySqlConnection conn = ConexaoMySQL.ObterConexao())
+                {
+                    try
+                    {
+                        conn.Open();
+                        string query = "DELETE FROM Produtos WHERE Id = @id";
+
+                        using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                        {
+                            cmd.Parameters.AddWithValue("@id", Convert.ToInt32(txtId.Text));
+                            cmd.ExecuteNonQuery();
+
+                            MessageBox.Show("Produto excluído com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                            LimparCampos();
+                            CarregarProdutosMySQL();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Erro ao excluir no MySQL: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        // ==========================================================
+        // 4. PREENCHIMENTO AUTOMÁTICO (Seleção na DataGrid)
+        // ==========================================================
+        private void dgProdutos_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (dgProdutos.SelectedItem is Produto prod)
+            {
+                txtId.Text = prod.Id.ToString();
+                txtNome.Text = prod.Nome;
+                txtPreco.Text = prod.Preco.ToString("F2");
+                txtEstoque.Text = prod.Estoque.ToString();
+            }
+        }
+
+        // ==========================================================
+        // 5. NOVO / LIMPAR
+        // ==========================================================
+        private void btnLimpar_Click(object sender, RoutedEventArgs e)
+        {
+            LimparCampos();
+        }
+
+        private void LimparCampos()
+        {
+            txtId.Clear();
+            txtNome.Clear();
+            txtPreco.Clear();
+            txtEstoque.Clear();
+            dgProdutos.UnselectAll();
+            txtNome.Focus();
+        }
+    }
+}
