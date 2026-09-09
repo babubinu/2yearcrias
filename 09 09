@@ -1,36 +1,37 @@
 using System.Data.Entity;
-
 using System.Linq;
-
 using OdontoTech.Models;
 
 namespace OdontoTech.Data
-
 {
+    public class AppDbContext : DbContext
+    {
+        public AppDbContext()
+            : base(@"Server=(localdb)\mssqllocaldb;Database=OdontoTechDB;Trusted_Connection=True;")
+        {
+            Database.CreateIfNotExists();
+        }
 
-public class AppDbContext: DbContext
+        public DbSet<Usuario> Usuarios { get; set; }
 
-{
+        public void CriarBancoESeed()
+        {
+            Database.CreateIfNotExists();
 
-public AppDbContext()
+            if (!Usuarios.Any())
+            {
+                Usuarios.Add(new Usuario
+                {
+                    Nome = "Dr. Hermilo",
+                    Email = "admin@odonto.com",
+                    Senha = "123"
+                });
 
-: base(@"Server=
-
-(localdb)\mssqllocaldb;Database=OdontoTechDB; Trusted_Connection-True;")
-
-{
-
-Database.CreateIfNotExists();
-
+                SaveChanges();
+            }
+        }
+    }
 }
-
-public DbSet<Usuario> Usuarios { get; set; }
-
-public void CriarBancoESeed()
-
-{
-
-Database.CreateIfNotExists();
 
 
 
