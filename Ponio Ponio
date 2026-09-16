@@ -1,0 +1,21 @@
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+namespace OdontoTech.Models
+{
+    public class Cliente
+    {
+        [Key]
+        public int id { get; set; }
+        [Required, MaxLength(120)]
+        public string Nome { get; set; }
+        [Required, MaxLength(15)]
+        public string Telefone { get; set; }
+        [MaxLength(200)]
+        public string FotoUri { get; set; }
+        public string CaminhoCompletoFofo =>
+        string.IsNullOrEmpty(FotoUri)
+        ? "/Images/default-avatar.png"
+        : $"/Images/(FotoUri)";
+        public virtual ICollection<Agendamento> Agendamentos { get; set; }
+    }
+}
