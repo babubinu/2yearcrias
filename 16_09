@@ -42,28 +42,29 @@ namespace OdontoTech.Models
 
 {
 
-public class Agendamento
+    public class Agendamento
+    {
+        [Key]
+
+        public int Id { get; set; }
+
+        [Required]
+
+        public DateTime DataHora { get; set; }
+
+        [Required, MaxLength(80)]
+
+        public string DentistaEspecialidade { get; set; }
+
+        [Required, MaxLength(80)]
+
+        public string Procedimento { get; set; }
+
+        [Required, MaxLength(30)]
+
+        public string Status { get; set; }
+
+        public int ClienteId { get; set; }
+    }
 
 }
-
-[Key]
-
-public int Id { get; set; }
-
-[Required]
-
-public DateTime DataHora { get; set; }
-
-[Required, MaxLength(80)]
-
-public string DentistaEspecialidade { get; set; }
-
-[Required, MaxLength(80)]
-
-I public string Procedimento { get; set; }
-
-[Required, MaxLength(30)]
-
-public string Status { get; set; }
-
-public int ClienteId { get; set; }
