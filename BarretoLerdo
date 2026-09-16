@@ -1,0 +1,67 @@
+using System;
+using System.Data.Entity;
+using System.Linq;
+using OdontoTech.Models;
+namespace OdontoTech.Data
+{
+    public class AppDbContext : DbContext
+    {
+        public AppDbContext()
+        : base(@"Server=(localdb)\mssqllocaldb;Database=OdontoTechDB;Trusted_Connection=True;")
+        {
+            Database.CreateIfNotExists();
+        }
+        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<Agendamento> Agendamentos { get; set; }
+        public void CriarBancoESeed()
+        {
+            Database.CreateIfNotExists();
+            // Insere usuário padrão se a tabela estiver vazia
+            if (!Usuarios.Any())
+            {
+                Usuarios.Add(new Usuario
+                {
+                    Nome = "Dr. Hermilo",
+                    Email = "admin@odonto.com",
+                    Senha = "123"
+                });
+            }
+            if (!Clientes.Any())
+            {
+                var c1 = new Cliente
+                {
+                    Nome = "Mariana Cano",
+                    Telefone = "(18) 99711-0804",
+                    FotoUrl = "paciente1.jpg"
+                };
+                var c2 = new Cliente
+                {
+                    Nome = "Lucas Almeida",
+                    Telefone = "(18) 99711-0806",
+                    FotoUrl = "paciente2.jpg"
+                };
+                var c3 = new Cliente
+                {
+                    Nome = "Carla Dias",
+                    Telefone = "(18) 99747-8096",
+                    FotoUrl = "paciente3.jpg"
+                };
+                Clientes.AddRange(new[] { c1, c2, c3 });
+                SaveChanges();
+
+                Agendamentos.Add(new Agendamento
+                {
+                    DataHora = DateTime.Today.AddHours(9),
+                    DentistaEspecialidade = "Dra. Beatriz (Ortodontia)",
+                    Procedimento = "Manutenção de Aparelho",
+                    Status = "Atendimento",
+                }
+
+
+            }
+            
+
+        }
+    }
+}
