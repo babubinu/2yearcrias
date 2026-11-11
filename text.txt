@@ -1,0 +1,84 @@
+APPCONFIG
+
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+	<configSections>
+		<section name="entityFramework" type="System.Data.Entity.Internal.ConfigFile.EntityFrameworkSection, EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" requirePermission="false" />
+	</configSections>
+	<connectionStrings>
+		<add name="toledoConnection"
+			 connectionString="Server=(localdb)\MSSQLLocalDB;Database=toledo;Trusted_Connection=True;"
+			 providerName="System.Data.SqlClient" />
+	</connectionStrings>
+	<startup>
+		<supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.7.2" />
+	</startup>
+	<entityFramework>
+		<providers>
+			<provider invariantName="System.Data.SqlClient" type="System.Data.Entity.SqlServer.SqlProviderServices, EntityFramework.SqlServer" />
+		</providers>
+	</entityFramework>
+</configuration>
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+DBCONTEXT
+
+using System.Data.Entity;
+using toledo.Models;
+
+namespace toledo.Data
+{
+    public class toledoDbContext : DbContext
+    {
+        public toledoDbContext() : base("name=toledoConnection") { }
+
+        public DbSet<Alunos> Alunos { get; set; }
+        public DbSet<Professores> Professores { get; set; }
+    }
+}
+-------------------------------------------------------------------------------------------------------------------
+MW.CS
+
+using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System;
+using System.Linq;
+using teste.Data;
+
+namespace teste.Views
+{
+
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+
+        private void btnEntrar_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                using (var db = new JogosDbContext())
+                {
+                    var usuario = db.Usuarios.FirstOrDefault(u =>
+                    u.Email == txtEmail.Text && u.Senha == txtSenha.Password);
+
+                    if (usuario == null)
+                    {
+                        MessageBox.Show("Email ou Senha inválidos");
+                        return;
+                    }
+                }
+                var telaJogos = new JogosWindow();
+                telaJogos.Show();
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro: " + ex.Message);
+            }
+        }
+    }
+}
